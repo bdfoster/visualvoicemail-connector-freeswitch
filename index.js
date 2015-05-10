@@ -1,6 +1,7 @@
 // Express Setup
 var express = require('express');
 var app = express();
+
 // body-parser Setup
 var bodyParser = require('body-parser');
 
@@ -9,6 +10,9 @@ var multer = require('multer');
 
 // Socket.io Setup
 // TODO: Finish Socket.io setup
+
+// async setup
+
 
 // http Setup
 var http = require('http');
@@ -31,7 +35,7 @@ var fs = {
 	pass: "ClueCon"
 }
 
-var esl = require('modesl');
+var modesl = require('modesl');
 var eslConnect = true;
 var eslConnected = false;
 if (eslConnect) {
@@ -156,14 +160,14 @@ app.get('/login', function(req, res, next) {
 	next();
 });
 
-app.get('/message/list/saved', function(req, res, next) {
+app.get('/message/list/:list', function(req, res, next) {
 	if (req.user.authenticated) {
-		log(3, "Grabbing saved message list for: " + req.user.id + "@" + req.user.domain, req.session.id);
+		log(3, "Getting " + req.params.list + " message list for: " + req.user.id + "@" + req.user.domain, req.session.id);
 		var msgList = [];
 		
 		
 		var conn = new esl.Connection(fs.host, fs.port, fs.pass, function() {
-			conn.api('vm_fsdb_msg_list', 'json default ' + req.user.domain + ' ' + req.user.id + ' inbox all', function(eslResponse) {
+			conn.api('vm_fsdb_msg_list', 'json default ' + req.user.domain + ' ' + req.user.id + ' inbox ' + req.params.list, function(eslResponse) {
 				log(3, 'Response from FreeSWITCH: ' + eslResponse.body, req.session.id);
 				
 				var body = JSON.parse(eslResponse.body);
@@ -187,39 +191,6 @@ app.get('/message/list/saved', function(req, res, next) {
 		next();
 	}
 });
-
-app.get('/message/list/new', function(req, res, next) {
-	if (req.user.authenticated) {
-		log(3, "Grabbing new message list for: " + req.user.id + "@" + req.user.domain, req.session.id);
-		var msgList = [];
-		
-		
-		var conn = new esl.Connection(fs.host, fs.port, fs.pass, function() {
-			conn.api('vm_fsdb_msg_list', 'json default ' + req.user.domain + ' ' + req.user.id + ' inbox new', function(eslResponse) {
-				log(3, 'Response from FreeSWITCH: ' + eslResponse.body, req.session.id);
-				
-				var body = JSON.parse(eslResponse.body);
-				
-				log(2, "FreeSWITCH says user has " + body['VM-List-Count'] + " messages.", req.session.id);
-				
-				if (body['VM-List-Count'] > 0) {
-					log(3, "We have messages to parse!", req.session.id);
-					for (i = 0; i < body['VM-List-Count']; i++) {
-						msgList[(i)] = body['VM-List-Message-' + (i + 1) + '-UUID'];
-					}
-					log(3, "Message List: " + msgList , req.session.id);
-					
-					res.status(200).jsonp(msgList);	
-				}
-			});
-		});
-		
-	} else {
-		log(3, "Cannot do sync for unauthenticated user.", req.session.id);
-		next();
-	}
-});
-
 
 // Get Message Detail from FreeSWITCH
 app.get('/message/:uuid', function(req, res, next) {
