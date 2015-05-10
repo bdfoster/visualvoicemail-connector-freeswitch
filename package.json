@@ -1,5 +1,5 @@
 {
-  "name": "visualvoicemail-service",
+  "name": "visualvoicemail-connector-freeswitch",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
