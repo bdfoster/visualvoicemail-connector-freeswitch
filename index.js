@@ -39,7 +39,7 @@ var modesl = require('modesl');
 var eslConnect = true;
 var eslConnected = false;
 if (eslConnect) {
-	var eslConnection = new esl.Connection('127.0.0.1', 8021, 'ClueCon', function(res) {
+	var eslConnection = new modesl.Connection('127.0.0.1', 8021, 'ClueCon', function(res) {
 		log(2, "Connected to FreeSWITCH");
 		eslConnected = true;
 	});
@@ -128,7 +128,7 @@ app.use(function(req, res, next) {
 	if (req.user) {
 		log(3, "Authenticating user " + req.user.id + " to FreeSWITCH domain " + req.user.domain + "...", req.session.id);
 		
-		var conn = new esl.Connection(fs.host, fs.port, fs.pass, function() {
+		var conn = new modesl.Connection(fs.host, fs.port, fs.pass, function() {
 			conn.api('vm_fsdb_auth_login', 'default ' + req.user.domain + ' ' + req.user.id + ' ' + req.user.pass, function(response) {
 				log(3, 'Response from FreeSWITCH: ' + JSON.stringify(response), req.session.id);
 				
@@ -166,7 +166,7 @@ app.get('/message/list/:list', function(req, res, next) {
 		var msgList = [];
 		
 		
-		var conn = new esl.Connection(fs.host, fs.port, fs.pass, function() {
+		var conn = new modesl.Connection(fs.host, fs.port, fs.pass, function() {
 			conn.api('vm_fsdb_msg_list', 'json default ' + req.user.domain + ' ' + req.user.id + ' inbox ' + req.params.list, function(eslResponse) {
 				log(3, 'Response from FreeSWITCH: ' + eslResponse.body, req.session.id);
 				
@@ -199,7 +199,7 @@ app.get('/message/:uuid', function(req, res, next) {
 		var msg = [];
 		
 
-		var conn = new esl.Connection(fs.host, fs.port, fs.pass, function() {
+		var conn = new modesl.Connection(fs.host, fs.port, fs.pass, function() {
 			conn.api('vm_fsdb_msg_get', 'json default ' + req.user.domain + ' ' + req.user.id + ' ' + req.params.uuid, function(eslResponse) {
 				log(3, "Response from Freeswitch: " + eslResponse.body, req.session.id);
 				
